@@ -170,4 +170,4 @@ The improvement is especially visible on the REM class, which is underrepresente
  
 ## Conclusion
  
-By replacing SGD with Adam — a single, well-motivated change — we improved convergence speed and generalisation. The model architecture and preprocessing pipeline remain exactly those of Experiment 2, making the comparison clean and the effect of the optimizer change directly measurable.
+By replacing SGD with Adam a single, well-motivated change we improved convergence speed and generalisation. The model architecture and preprocessing pipeline remain exactly those of Experiment 2, making the comparison clean and the effect of the optimizer change directly measurable.
