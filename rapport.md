@@ -71,3 +71,31 @@ The model performs well on **rem** and **awake** which are the most represented 
 | 3    | 0.888  | 0.487    | 0.915    | 0.884    |
 
 The micro F1 score around **0.88** confirms that the model generalizes well on rem and awake, but struggles with n-rem which brings the overall score down.
+
+## Competition
+ 
+## Overview
+ 
+The goal of this competition is to classify EEG recordings of mice into three sleep stages: Awake, N-REM, and REM. The model is evaluated using the **macro F1-score** on the test set.
+ 
+Starting from the Experiment 2 architecture, we implemented one targeted improvement: **replacing the SGD optimizer with Adam**. The rest of the model and preprocessing pipeline remains unchanged.
+ 
+## Implemented Idea: Adam Optimizer
+ 
+### Motivation
+ 
+The original model used SGD (Stochastic Gradient Descent) with a fixed learning rate of 0.001 and momentum of 0.99. While SGD can work well, it applies the same learning rate to all parameters and can be slow to converge, especially when the loss surface is uneven across dimensions.
+ 
+Adam (Adaptive Moment Estimation) was chosen as the single improvement because it addresses these limitations directly.
+
+### How Adam Works
+ 
+Adam keeps a running estimate of two quantities for each parameter:
+ 
+- **First moment** (mean of past gradients) : gives momentum to the update
+- **Second moment** (variance of past gradients) : scales the step size per parameter
+ 
+This means parameters with small gradients get larger updates, and parameters with large gradients get smaller updates, the optimizer self-adjusts. The update rule is:
+```
+theta = theta - lr * m_hat / (sqrt(v_hat) + epsilon)
+```
