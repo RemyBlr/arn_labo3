@@ -11,20 +11,22 @@ We chose the 25 lowest frequencies going from 1Hz to 25Hz, they cover all EEG ba
 Using the `StandardScaler` centers each of the 25 features to mean 0 and std 1, thus stabilizing and speeding up training.
 
 ### Architecture
-![Architecture](./assets/1st_experiment/model_summary.png)
+![Architecture](./assets/1st_experiment/model_summary.png){width=50%}
 
 We only use one hidden layer with 16 neurones as we only have 25 inputs to treat. Adding hidden layers and neurones would risk overfitting without having any benefits. The sigmoid output produces a probability between 0 and 1, and the threshold of 0.5 determines the predicted class. We also added a momentum of 0.9 so we avoid getting stuck in a local minima and speed up convergeance. And finaly, the learning rate of 0.01 is pretty standard, but we don't want it to be too high or too low as it could cause losses to the convergeance and slow down the training.
 
 ### Training history
-![Training history](./assets/1st_experiment/3f_cv.png)
+![Training history](./assets/1st_experiment/3f_cv.png){width=50%}
 
 Both `train_loss` and `val_loss` drop pretty drastically ine the first two epochs and the decrease slowly and steadily at the same time. They converge around 0.084. There is no visible overfitting as the two curves remaing close during the training and `val_loss` never increases.
 
 ### Performance
-![Confusion Matrix Fold 1](./assets/1st_experiment/cm1.png)
-![Confusion Matrix Fold 2](./assets/1st_experiment/cm2.png)
-![Confusion Matrix Fold 3](./assets/1st_experiment/cm3.png)
-![Global confusion matrix](./assets/1st_experiment/global_cm.png)
+
+*Global*
+
+Confusion matrix for each fold is available in the corresponding assetes folder.
+ 
+![Global confusion matrix](./assets/1st_experiment/global_cm.png){width=50%}
 
 The accuracy is as follows : (13626 + 22665) / 40863 = 88.8%. With this result, we can affirm that the model correctly classifies the large majority of samples in both classes. The error that is mostly present is when the model predicts `awake` when the mouse is actually `asleep` (2877 cases), it is not completly absurd as the light n-rem has EEG patterns that are similar to `awake` state. Here is the F1 score for each class and each fold:
 
@@ -40,7 +42,7 @@ The accuracy is as follows : (13626 + 22665) / 40863 = 88.8%. With this result, 
 Same as the first experiment, we chose the 25 lowest frequencies from 1Hz to 25Hz. The `StandardScaler` centers each feature to mean 0 and std 1. Since we now have 3 classes, the labels are encoded using `OneHotEncoder` which produces a one-hot vector per sample (e.g. `[1,0,0]` for rem, `[0,1,0]` for n-rem, `[0,0,1]` for awake).
 
 ### Architecture
-![Architecture](./assets/2nd_experiment/2nd_model_summary.png)
+![Architecture](./assets/2nd_experiment/2nd_model_summary.png){width=50%}
 
 Compared to the first experiment, the main changes are:
 - **3 output neurons** instead of 1, one per class (rem, n-rem, awake)
@@ -52,15 +54,17 @@ The predicted class is determined by `argmax` of the output vector, which avoids
 We kept the same single hidden layer with 8 neurons, the same learning rate of 0.001 and momentum of 0.99.
 
 ### Training history
-![Training history](./assets/2nd_experiment/2nd_3f_cv.png)
+![Training history](./assets/2nd_experiment/2nd_3f_cv.png){width=50%}
 
 Both `train_loss` and `val_loss` drop sharply in the first few epochs then decrease slowly and steadily. They converge around 0.32-0.34. The validation loss is slightly higher than the training loss but remains close throughout training, indicating no significant overfitting. The std bands are narrow which shows consistent behaviour across the 3 folds.
 
 ### Performance
-![Confusion Matrix Fold 1](./assets/2nd_experiment/2nd_cm1.png)
-![Confusion Matrix Fold 2](./assets/2nd_experiment/2nd_cm2.png)
-![Confusion Matrix Fold 3](./assets/2nd_experiment/2nd_cm3.png)
-![Global confusion matrix](./assets/2nd_experiment/2nd_global_cm.png)
+
+*Global*
+
+Confusion matrix for each fold is available in the corresponding assetes folder.
+
+![Global confusion matrix](./assets/2nd_experiment/2nd_global_cm.png){width=50%}
 
 The model performs well on **rem** and **awake** which are the most represented classes. However, **n-rem** is the most confused class, out of 2839 total n-rem samples, only 1094 are correctly classified. It is frequently misclassified as awake (1406 cases) or rem (339 cases). This is expected as n-rem shares EEG characteristics with both other states, especially light n-rem which resembles the awake state.
 
@@ -76,7 +80,7 @@ The micro F1 score around **0.88** confirms that the model generalizes well on r
  
 ## Model Summary
  
-![Model summary](./assets/competition/comp_model_summary.png)
+![Model summary](./assets/competition/comp_model_summary.png){width=50%}
  
 | Layer | Details |
 |---|---|
@@ -106,7 +110,7 @@ The micro F1 score around **0.88** confirms that the model generalizes well on r
  
 ## Training History
  
-![3-fold cross-validation loss](./assets/competition/comp_3f_cv.png)
+![3-fold cross-validation loss](./assets/competition/comp_3f_cv.png){width=50%}
  
 ---
  
@@ -123,21 +127,11 @@ The micro F1 score around **0.88** confirms that the model generalizes well on r
  
 ### Confusion matrices
  
-*Fold 1*
- 
-![Confusion matrix fold 1](./assets/competition/comp_cm1.png)
- 
-*Fold 2*
- 
-![Confusion matrix fold 2](./assets/competition/comp_cm2.png)
- 
-*Fold 3*
- 
-![Confusion matrix fold 3](./assets/competition/comp_cm3.png)
- 
 *Global*
- 
-![Global confusion matrix](./assets/competition/comp_global_cm.png)
+
+Confusion matrix for each fold is available in the corresponding assetes folder.
+
+![Global confusion matrix](./assets/competition/comp_global_cm.png){width=50%}
  
 ---
  
@@ -147,9 +141,9 @@ The training and validation loss curves show fast and stable convergence — bot
  
 The results across the three classes are however uneven:
  
-- **Awake** is classified very well (F1 ≈ 0.91), which is expected as it is the most represented class and has distinct EEG features.
-- **REM** also performs well (F1 ≈ 0.89), despite a non-negligible number of samples being confused with Awake (1486 globally).
-- **N-REM** is the weakest class (F1 ≈ 0.50). It is the least represented and its EEG signal overlaps with both REM and Awake, making it inherently harder to classify. The confusion matrix confirms this: N-REM samples are frequently predicted as Awake (1398 globally).
+- **Awake** is classified very well (F1 = 0.91), which is expected as it is the most represented class and has distinct EEG features.
+- **REM** also performs well (F1 = 0.89), despite a non-negligible number of samples being confused with Awake (1486 globally).
+- **N-REM** is the weakest class (F1 = 0.50). It is the least represented and its EEG signal overlaps with both REM and Awake, making it inherently harder to classify. The confusion matrix confirms this: N-REM samples are frequently predicted as Awake (1398 globally).
  
 Compared to Experiment 2 which used SGD, Adam converges in fewer effective steps because it adapts the learning rate per parameter. This translates into a better-calibrated softmax output and a slightly higher macro F1-score.
  
