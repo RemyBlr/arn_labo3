@@ -74,100 +74,87 @@ The micro F1 score around **0.88** confirms that the model generalizes well on r
 
 ## Competition
  
-## Overview
+## Model Summary
  
-The goal of this competition is to classify EEG recordings of mice into three sleep stages: Awake, N-REM, and REM. The model is evaluated using the **macro F1-score** on the test set.
- 
-Starting from the Experiment 2 architecture, we implemented one targeted improvement: **replacing the SGD optimizer with Adam**. The rest of the model and preprocessing pipeline remains unchanged.
- 
-## Implemented Idea: Adam Optimizer
- 
-### Motivation
- 
-The original model used SGD (Stochastic Gradient Descent) with a fixed learning rate of 0.001 and momentum of 0.99. While SGD can work well, it applies the same learning rate to all parameters and can be slow to converge, especially when the loss surface is uneven across dimensions.
- 
-Adam (Adaptive Moment Estimation) was chosen as the single improvement because it addresses these limitations directly.
-
-### How Adam Works
- 
-Adam keeps a running estimate of two quantities for each parameter:
- 
-- **First moment** (mean of past gradients) : gives momentum to the update
-- **Second moment** (variance of past gradients) : scales the step size per parameter
- 
-This means parameters with small gradients get larger updates, and parameters with large gradients get smaller updates, the optimizer self-adjusts. The update rule is:
-```
-theta = theta - lr * m_hat / (sqrt(v_hat) + epsilon)
-```
-where `m_hat` and `v_hat` are bias-corrected estimates of the first and second moments.
- 
-### Code Change
- 
-The only modification to the model was **one line** in `create_model()`:
- 
-```python
-# Before (Experiment 2)
-optimizer=keras.optimizers.SGD(learning_rate=0.001, momentum=0.99)
- 
-# After (Competition)
-optimizer=keras.optimizers.Adam(learning_rate=0.001)
-```
- 
----
- 
-## Model Architecture
- 
-The architecture is identical to Experiment 2:
+![Model summary](./assets/competition/comp_model_summary.png)
  
 | Layer | Details |
 |---|---|
-| Input | 25 features (`amplitude_around_1_Hertz` … `25_Hertz`) |
-| Dense (hidden) | 8 neurons, ReLU activation |
-| Dense (output) | 3 neurons, Softmax activation |
-| Loss | Categorical Crossentropy |
-| Optimizer | **Adam** (lr=0.001) |
-| Epochs | 50 |
-| Validation | KFold (3 splits, shuffle=True) |
+| Input | 25 features (`amplitude_around_1_Hertz` … `amplitude_around_25_Hertz`) |
+| Dense (hidden) | 8 neurons, ReLU activation : 208 parameters |
+| Dense (output) | 3 neurons, Softmax activation : 27 parameters |
+| **Total params** | **235 (940 B)** |
  
 ---
  
-## Preprocessing
+## Chosen Hyper-parameters
  
-Preprocessing is identical to Experiment 2 and applied the same way to the test data:
+| Hyper-parameter | Value | Justification |
+|---|---|---|
+| Optimizer | **Adam** | Adaptive learning rate per parameter, faster convergence than SGD |
+| Learning rate | 0.001 | Standard default for Adam |
+| Hidden neurons | 8 | Same as Experiment 2 baseline |
+| Activation (hidden) | ReLU | Avoids vanishing gradient |
+| Activation (output) | Softmax | Outputs a probability distribution over 3 classes |
+| Loss | Categorical Crossentropy | Standard loss for multi-class classification |
+| Epochs | 50 | Sufficient for convergence with Adam |
+| Folds | 3 | 3-fold cross-validation as required |
  
-- Features selected: `amplitude_around_1_Hertz` to `amplitude_around_25_Hertz` (25 features)
-- Labels: one-hot encoded using `OneHotEncoder`
-- Features: standardized per column using `StandardScaler` (zero mean, unit variance)
- 
-The same scaler fitted on training data is reused when preprocessing the test set, ensuring no data leakage.
- 
----
- 
-## Validation Strategy
- 
-We use 3-fold cross-validation (KFold, shuffled) as in Experiment 2. For each fold we report the **macro F1-score**, as specified by the competition instructions.
- 
-The macro F1-score computes the F1 per class independently and averages them without weighting by class size. This is stricter than micro F1 and penalises poor performance on the minority class (REM).
+**Implemented idea:** replacing SGD (used in Experiment 2) with Adam. Adam maintains a running estimate of the first and second moments of the gradients, allowing it to adapt the learning rate individually for each parameter. This leads to faster and more stable convergence compared to SGD with a fixed step size.
  
 ---
  
-## Results
+## Training History
  
-| Model | Mean Macro F1 (3-fold CV) |
-|---|---|
-| Experiment 2 : SGD (baseline) | ~0.82 |
-| Competition : Adam | **[your score here]** |
+![3-fold cross-validation loss](./assets/competition/comp_3f_cv.png)
+ 
+---
+ 
+## Performance Results
+ 
+### F1-score per class
+ 
+| Fold | REM | N-REM | Awake | Macro F1 |
+|---|---|---|---|---|
+| Fold 1 | 0.8851 | 0.5024 | 0.9140 | 0.7672 |
+| Fold 2 | 0.8838 | 0.5236 | 0.9126 | 0.7733 |
+| Fold 3 | 0.8906 | 0.4824 | 0.9166 | 0.7632 |
+| **Mean** | **0.8865** | **0.5028** | **0.9144** | **0.7679** |
+ 
+### Confusion matrices
+ 
+*Fold 1*
+ 
+![Confusion matrix fold 1](./assets/competition/comp_cm1.png)
+ 
+*Fold 2*
+ 
+![Confusion matrix fold 2](./assets/competition/comp_cm2.png)
+ 
+*Fold 3*
+ 
+![Confusion matrix fold 3](./assets/competition/comp_cm3.png)
+ 
+*Global*
+ 
+![Global confusion matrix](./assets/competition/comp_global_cm.png)
  
 ---
  
 ## Analysis
  
-Adam converges faster than SGD and reaches a lower training loss within 50 epochs because it adapts the learning rate per parameter. On a small dataset with 25 input features and 3 classes, this translates into a better-calibrated softmax output and a higher macro F1-score.
+The training and validation loss curves show fast and stable convergence — both losses drop sharply in the first 5 epochs and then plateau around 0.325 with very little gap between train and validation, indicating no significant overfitting.
  
-The improvement is especially visible on the REM class, which is underrepresented. Adam's adaptive updates allow it to learn the minority class signal more reliably than fixed-step SGD.
+The results across the three classes are however uneven:
+ 
+- **Awake** is classified very well (F1 ≈ 0.91), which is expected as it is the most represented class and has distinct EEG features.
+- **REM** also performs well (F1 ≈ 0.89), despite a non-negligible number of samples being confused with Awake (1486 globally).
+- **N-REM** is the weakest class (F1 ≈ 0.50). It is the least represented and its EEG signal overlaps with both REM and Awake, making it inherently harder to classify. The confusion matrix confirms this: N-REM samples are frequently predicted as Awake (1398 globally).
+ 
+Compared to Experiment 2 which used SGD, Adam converges in fewer effective steps because it adapts the learning rate per parameter. This translates into a better-calibrated softmax output and a slightly higher macro F1-score.
  
 ---
  
 ## Conclusion
  
-By replacing SGD with Adam a single, well-motivated change we improved convergence speed and generalisation. The model architecture and preprocessing pipeline remain exactly those of Experiment 2, making the comparison clean and the effect of the optimizer change directly measurable.
+By replacing SGD with Adam, a single, well-motivated change we obtained a mean macro F1-score of **0.7679** across 3 folds. The main limitation is the N-REM class, which remains difficult to classify due to class imbalance and spectral overlap with the other stages. The architecture and preprocessing pipeline are identical to Experiment 2, making the contribution of the optimizer change directly measurable.
