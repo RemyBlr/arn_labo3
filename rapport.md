@@ -1,3 +1,11 @@
+---
+title: "Labo 3 - ARN"
+author: Bleuer Rémy, Duruz Florian
+date: 20.03.2026
+geometry: margin=2cm
+output: pdf_document
+---
+
 # Labo 3 - ARN
 - Group : Bleuer Rémy, Duruz Florian
 - Class : B
@@ -11,12 +19,12 @@ We chose the 25 lowest frequencies going from 1Hz to 25Hz, they cover all EEG ba
 Using the `StandardScaler` centers each of the 25 features to mean 0 and std 1, thus stabilizing and speeding up training.
 
 ### Architecture
-![Architecture](./assets/1st_experiment/model_summary.png){width=50%}
+![Architecture](./assets/1st_experiment/model_summary.png){width=70%}
 
 We only use one hidden layer with 16 neurones as we only have 25 inputs to treat. Adding hidden layers and neurones would risk overfitting without having any benefits. The sigmoid output produces a probability between 0 and 1, and the threshold of 0.5 determines the predicted class. We also added a momentum of 0.9 so we avoid getting stuck in a local minima and speed up convergeance. And finaly, the learning rate of 0.01 is pretty standard, but we don't want it to be too high or too low as it could cause losses to the convergeance and slow down the training.
 
 ### Training history
-![Training history](./assets/1st_experiment/3f_cv.png){width=50%}
+![Training history](./assets/1st_experiment/3f_cv.png){width=70%}
 
 Both `train_loss` and `val_loss` drop pretty drastically ine the first two epochs and the decrease slowly and steadily at the same time. They converge around 0.084. There is no visible overfitting as the two curves remaing close during the training and `val_loss` never increases.
 
@@ -42,7 +50,7 @@ The accuracy is as follows : (13626 + 22665) / 40863 = 88.8%. With this result, 
 Same as the first experiment, we chose the 25 lowest frequencies from 1Hz to 25Hz. The `StandardScaler` centers each feature to mean 0 and std 1. Since we now have 3 classes, the labels are encoded using `OneHotEncoder` which produces a one-hot vector per sample (e.g. `[1,0,0]` for rem, `[0,1,0]` for n-rem, `[0,0,1]` for awake).
 
 ### Architecture
-![Architecture](./assets/2nd_experiment/2nd_model_summary.png){width=50%}
+![Architecture](./assets/2nd_experiment/2nd_model_summary.png){width=70%}
 
 Compared to the first experiment, the main changes are:
 - **3 output neurons** instead of 1, one per class (rem, n-rem, awake)
@@ -54,7 +62,7 @@ The predicted class is determined by `argmax` of the output vector, which avoids
 We kept the same single hidden layer with 8 neurons, the same learning rate of 0.001 and momentum of 0.99.
 
 ### Training history
-![Training history](./assets/2nd_experiment/2nd_3f_cv.png){width=50%}
+![Training history](./assets/2nd_experiment/2nd_3f_cv.png){width=70%}
 
 Both `train_loss` and `val_loss` drop sharply in the first few epochs then decrease slowly and steadily. They converge around 0.32-0.34. The validation loss is slightly higher than the training loss but remains close throughout training, indicating no significant overfitting. The std bands are narrow which shows consistent behaviour across the 3 folds.
 
@@ -80,7 +88,7 @@ The micro F1 score around **0.88** confirms that the model generalizes well on r
  
 ## Model Summary
  
-![Model summary](./assets/competition/comp_model_summary.png){width=50%}
+![Model summary](./assets/competition/comp_model_summary.png){width=70%}
  
 | Layer | Details |
 |---|---|
@@ -110,7 +118,7 @@ The micro F1 score around **0.88** confirms that the model generalizes well on r
  
 ## Training History
  
-![3-fold cross-validation loss](./assets/competition/comp_3f_cv.png){width=50%}
+![3-fold cross-validation loss](./assets/competition/comp_3f_cv.png){width=70%}
  
 ---
  
